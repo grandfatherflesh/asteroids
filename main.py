@@ -34,25 +34,34 @@ def main():
 	Shot.containers = (shots, updatable, drawable)
 	#Create player once, before the game loop
 	player_sprite = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+	PLAYER_SHOOT_CD = 0
 	#Create AsteroidField
 	asteroid_field = AsteroidField()
-
+	#Game loop
 	while True:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return
 			if event.type == pygame.KEYDOWN:
-				print(f"Key pressed: {event.key}")
 				if event.key == pygame.K_SPACE:
+					if PLAYER_SHOOT_CD > 0:
+						pass
 					new_shot = player_sprite.shoot()
 					shots.add(new_shot)
+					PLAYER_SHOOT_CD += 0.3
 		screen.fill('black')
 		for update in updatable:
 			update.update(dt)
+			PLAYER_SHOOT_CD -= dt
 		for asteroid in asteroids:
 			if asteroid.collision(player_sprite) is True:
 				print("Game over!")
 				sys.exit()
+			for bullet in shots:
+				if new_shot.collision(asteroid) is True:
+					asteroid.split()
+					new_shot.kill()
+					break
 		for thing in drawable:
 			thing.draw(screen)
 
